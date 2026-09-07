@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>RAG Lab - AI 질의응답</title>
+    <link rel="stylesheet" th:href="@{/css/chat.css}">
+</head>
+<body>
+    <main class="chat-container">
+        <header>
+            <p class="eyebrow">LLM RAG LAB</p>
+            <h1>AI 질의응답</h1>
+            <p class="description">현재 단계에서는 Gemini가 일반 지식을 기반으로 답변합니다.</p>
+        </header>
+
+        <form class="question-form" th:action="@{/chat}" th:object="${chatRequest}" method="post">
+            <label for="question">질문</label>
+            <textarea id="question"
+                      th:field="*{question}"
+                      maxlength="2000"
+                      rows="6"
+                      placeholder="Gemini에게 질문할 내용을 입력하세요."></textarea>
+            <div class="field-error" th:if="${#fields.hasErrors('question')}" th:errors="*{question}"></div>
+            <div class="form-footer">
+                <span class="hint">최대 2,000자</span>
+                <button type="submit">질문하기</button>
+            </div>
+        </form>
+
+        <section class="error-panel" th:if="${chatError}" aria-live="polite">
+            <h2>요청 오류</h2>
+            <p th:text="${chatError}"></p>
+        </section>
+
+        <section class="answer-panel" th:if="${chatResponse}" aria-live="polite">
+            <div class="answer-heading">
+                <h2>Gemini 답변</h2>
+                <span th:text="|${chatResponse.latencyMs} ms|"></span>
+            </div>
+            <p class="answer" th:text="${chatResponse.answer}"></p>
+        </section>
+    </main>
+</body>
+</html>

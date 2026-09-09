@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>RAG Lab - 문서 관리</title>
+    <link rel="stylesheet" th:href="@{/css/document.css}">
+</head>
+<body>
+    <main class="document-container">
+        <nav>
+            <a th:href="@{/chat}">AI 질의응답</a>
+        </nav>
+
+        <header>
+            <p class="eyebrow">LLM RAG LAB</p>
+            <h1>문서 관리</h1>
+            <p class="description">PDF 또는 TXT 문서를 Chunk로 분할해 Oracle Vector Store에 저장합니다.</p>
+        </header>
+
+        <form class="upload-form" th:action="@{/documents/upload}" method="post" enctype="multipart/form-data">
+            <label for="file">업로드할 문서</label>
+            <input id="file" name="file" type="file" accept=".pdf,.txt,application/pdf,text/plain" required>
+            <button type="submit">문서 처리하기</button>
+        </form>
+
+        <section class="message success" th:if="${uploadResponse}" aria-live="polite">
+            <h2>처리 완료</h2>
+            <p>
+                <strong th:text="${uploadResponse.fileName}"></strong> 문서를
+                <strong th:text="${uploadResponse.chunkCount}"></strong>개의 Chunk로 저장했습니다.
+            </p>
+        </section>
+
+        <section class="message error" th:if="${uploadError}" aria-live="polite">
+            <h2>처리 실패</h2>
+            <p th:text="${uploadError}"></p>
+        </section>
+    </main>
+</body>
+</html>

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>RAG Lab - 문서 검색</title>
+
+    <link rel="stylesheet" th:href="@{/css/chat.css}">
+</head>
+<body>
+    <main class="chat-container">
+        <nav>
+            <a th:href="@{/chat}">AI 질의응답</a>
+            <span> · </span>
+            <a th:href="@{/documents}">문서 관리</a>
+        </nav>
+
+        <header>
+            <p class="eyebrow">LLM RAG LAB</p>
+            <h1>문서 유사도 검색</h1>
+
+            <p class="description">
+                질문과 의미적으로 유사한 문서 Chunk를
+                Oracle Vector Store에서 검색합니다.
+            </p>
+        </header>
+
+        <form class="question-form"
+              th:action="@{/search}"
+              method="get">
+
+            <label for="query">검색 질문</label>
+
+            <textarea id="query"
+                      name="query"
+                      rows="4"
+                      maxlength="2000"
+                      required
+                      th:text="${query}"
+                      placeholder="저장된 문서에서 검색할 질문을 입력하세요."></textarea>
+
+            <label for="topK">가져올 Chunk 개수</label>
+
+            <select id="topK" name="topK">
+                <option value="3"
+                        th:selected="${topK == 3}">
+                    3개
+                </option>
+
+                <option value="5"
+                        th:selected="${topK == 5}">
+                    5개
+                </option>
+
+                <option value="10"
+                        th:selected="${topK == 10}">
+                    10개
+                </option>
+            </select>
+
+            <div class="form-footer">
+                <span class="hint">
+                    유사도 기준을 통과한 Chunk만 표시됩니다.
+                </span>
+
+                <button type="submit">검색하기</button>
+            </div>
+        </form>
+
+        <section class="error-panel"
+                 th:if="${searchError}"
+                 aria-live="polite">
+
+            <h2>검색 오류</h2>
+            <p th:text="${searchError}"></p>
+        </section>
+
+        <section class="answer-panel"
+                 th:if="${searchResults != null
+                          and searchResults.isEmpty()}"
+                 aria-live="polite">
+
+            <h2>검색 결과 없음</h2>
+            <p>
+                설정된 유사도 기준을 통과한 문서 Chunk가 없습니다.
+            </p>
+        </section>
+
+        <section th:if="${searchResults != null
+                         and !searchResults.isEmpty()}">
+
+            <div class="answer-heading">
+                <h2>검색 결과</h2>
+
+                <span th:text="|총 ${resultCount}개|"></span>
+            </div>
+
+            <article class="answer-panel"
+                     th:each="result, status : ${searchResults}">
+
+                <div class="answer-heading">
+                    <h2 th:text="|검색 결과 ${status.count}|"></h2>
+
+                    <span th:if="${result.similarityScore != null}"
+                          th:text="|유사도 ${
+                              #numbers.formatDecimal(
+                                  result.similarityScore,
+                                  1,
+                                  4
+                              )
+                          }|">
+                    </span>
+                </div>
+
+                <p class="answer"
+                   th:text="${result.content}">
+                </p>
+
+                <div class="hint">
+                    <span>출처: </span>
+
+                    <strong th:text="${result.fileName}">
+                    </strong>
+
+                    <span th:text="| · ${result.contentType}|">
+                    </span>
+
+                    <span th:if="${result.totalChunks > 0}"
+                          th:text="| · Chunk ${
+                              result.chunkIndex + 1
+                          }/${result.totalChunks}|">
+                    </span>
+                </div>
+            </article>
+        </section>
+    </main>
+</body>
+</html>
